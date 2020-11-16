@@ -2,3 +2,4 @@
 .DS_Store
 # PyCharm files
 .idea/
+__pycache__
