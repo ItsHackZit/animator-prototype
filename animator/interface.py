@@ -1,7 +1,8 @@
 import tkinter as tk
 
 from core import *
-from objects import *
+from geometry import *
+
 
 class Window:
 
@@ -9,7 +10,6 @@ class Window:
 
     def add_shape(self, shape):
         name = f'create_{shape.suffix}({shape.args()})'
-        print(name)
         scope = {'canvas': self.canvas}
         exec(f'object_id = canvas.{name}', scope)
         self.__objects[scope['object_id']] = shape
