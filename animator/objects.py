@@ -32,6 +32,10 @@ class AnimationGroup:
     animations: [Animation] = []
 
 
+class HybridKeyframe:
+    pass
+
+
 class Keyframe:
     __animations: [Animation] = []
 

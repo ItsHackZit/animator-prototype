@@ -4,7 +4,22 @@ from core import *
 import escape
 
 
-class Path:
+class Object:
+
+    @staticmethod
+    def assemble_args(args: dict) -> str:
+        defaults = [str(i) for i in args.pop('args')]
+        pairs = [f'{i}={j}' for i, j in args.items()]
+        return ', '.join(defaults + pairs)
+
+    @escape
+    def __init__(self, origin: Point, **flags):
+        super().__init__()
+        self.origin = origin
+        self.fill = flags['fill']
+
+
+class Path(Object):
     class EndStyle:
         ROUND = tk.ROUND
         PROMINENT = tk.PROJECTING
@@ -52,8 +67,7 @@ class Path:
 
     @escape
     def __init__(self, init_point: Point, **flags):
-        self.origin = init_point
-        self.fill = flags['fill']
+        super().__init__(init_point, fill=flags['fill'])
         self.stroke = flags['stroke']
         self.endstyle = self.EndStyle(flags['end'])
         self.joinstyle = self.JoinStyle(flags['join'])
@@ -62,18 +76,11 @@ class Path:
         self.width = flags['width']
 
 
-class Shape:
-
-    @staticmethod
-    def assemble_args(args: dict) -> str:
-        defaults = [str(i) for i in args.pop('args')]
-        pairs = [f'{i}={j}' for i, j in args.items()]
-        return ', '.join(defaults + pairs)
+class Shape(Object):
 
     @escape
     def __init__(self, origin: Point, **flags):
-        self.origin = origin
-        self.fill = flags['fill']
+        super().__init__(origin, fill=flags['fill'])
         self.outline = flags['bd_color']
         self.width = flags['bd_stroke']
 

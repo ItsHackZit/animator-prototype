@@ -58,6 +58,3 @@ class Interface:
 
     def __init__(self, main=Window(), name='Automator'):
         self.__main_window = main
-
-    def __del__(self):
-        self.__main_window.dismiss()
