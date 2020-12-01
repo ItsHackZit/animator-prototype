@@ -1,10 +1,9 @@
 import tkinter as tk
 
 from core import *
-import escape
 
 
-class Object:
+class GeometryObject:
 
     @staticmethod
     def assemble_args(args: dict) -> str:
@@ -12,14 +11,16 @@ class Object:
         pairs = [f'{i}={j}' for i, j in args.items()]
         return ', '.join(defaults + pairs)
 
-    @escape
-    def __init__(self, origin: Point, **flags):
-        super().__init__()
+    def __init__(self, origin: Point, identifier=None, **flags):
         self.origin = origin
-        self.fill = flags['fill']
+        self.identifier = identifier
+        keys = {'fill': 'fill'}
+        for key, value in flags.items():
+            if key in keys.keys():
+                setattr(self, keys[key], value)
 
 
-class Path(Object):
+class Path(GeometryObject):
     class EndStyle:
         ROUND = tk.ROUND
         PROMINENT = tk.PROJECTING
@@ -51,38 +52,42 @@ class Path(Object):
                 raise Exception(f'Invalid style name \'{name}\'.')
 
     suffix = 'line'
-    points: [Point] = []
+    __points: [Point] = []
     endstyle = EndStyle.DEFAULT
     joinstyle = JoinStyle.ROUND
 
     def line(self, end: Point):
-        self.points.append(end)
+        self.__points.append(end)
 
     def args(self) -> str:
-        paths = [j for i in [(i.x, i.y) for i in self.points] for j in i]
+        paths = [j for i in [(i.x, i.y) for i in self.__points] for j in i]
         flags = self.__dict__.copy()
         flags['args'] = [self.origin.x, self.origin.y] + paths
         del flags['origin']
         return Shape.assemble_args(flags)
 
-    @escape
-    def __init__(self, init_point: Point, **flags):
-        super().__init__(init_point, fill=flags['fill'])
-        self.stroke = flags['stroke']
-        self.endstyle = self.EndStyle(flags['end'])
-        self.joinstyle = self.JoinStyle(flags['join'])
-        self.dash = flags['dash']
-        self.dashoffset = flags['dash_offset']
-        self.width = flags['width']
+    def __init__(self, init_point: Point, identifier=None, **flags):
+        super().__init__(init_point, identifier=identifier, **flags)
+        keys = {'stroke': 'outline', 'end': 'endstyle', 'join': 'joinstyle',
+                'dash': 'dash', 'dash_offset': 'dashoffset', 'width': 'width'}
+        for key, value in flags.items():
+            if key in keys.keys():
+                if key == 'end':
+                    setattr(self, keys[key], self.EndStyle(value))
+                elif key == 'join':
+                    setattr(self, keys[key], self.JoinStyle(value))
+                else:
+                    setattr(self, keys[key], value)
 
 
-class Shape(Object):
+class Shape(GeometryObject):
 
-    @escape
-    def __init__(self, origin: Point, **flags):
-        super().__init__(origin, fill=flags['fill'])
-        self.outline = flags['bd_color']
-        self.width = flags['bd_stroke']
+    def __init__(self, origin: Point, identifier=None, **flags):
+        super().__init__(origin, identifier=identifier, **flags)
+        keys = {'bd_color': 'outline', 'bd_stroke': 'width'}
+        for key, value in flags.items():
+            if key in keys.keys():
+                setattr(self, keys[key], value)
 
 
 class Rectangle(Shape):
@@ -97,13 +102,31 @@ class Rectangle(Shape):
         del flags['origin'], flags['frame']
         return Shape.assemble_args(flags)
 
-    def __init__(self, frame: Rect, **flags):
-        super().__init__(frame.origin, **flags)
+    def __init__(self, frame: Rect, identifier=None, **flags):
+        super().__init__(frame.origin, identifier=identifier, **flags)
         self.frame = frame
+
+
+class Arc(Rectangle):
+    suffix = 'arc'
+
+    def __init__(self, frame: Rect, start: int, angle: int, identifier=None, **flags):
+        super().__init__(frame, identifier=identifier, **flags)
+        keys = {'start': 'start', 'angle': 'extent', 'stroke': 'outline',
+                'end': 'endstyle', 'join': 'joinstyle', 'dash': 'dash',
+                'dash_offset': 'dashoffset', 'width': width}
+        for key, value in flags.items():
+            if key in keys.keys():
+                if key == 'end':
+                    setattr(self, keys[key], self.EndStyle(value))
+                elif key == 'join':
+                    setattr(self, keys[key], self.JoinStyle(value))
+                else:
+                    setattr(self, keys[key], value)
 
 
 class Oval(Rectangle):
     suffix = 'oval'
 
-    def __init__(self, frame: Rect, **flags):
-        super().__init__(frame, **flags)
+    def __init__(self, frame: Rect, identifier=None, **flags):
+        super().__init__(frame, identifier=identifier, **flags)

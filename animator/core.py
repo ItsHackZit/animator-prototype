@@ -1,6 +1,6 @@
 class Point:
-    def __str__(self):
-        return f'Point: ({self.x}, {self.y})'
+    # def __str__(self):
+    #     return f'Point: ({self.x}, {self.y})'
 
     def __init__(self, x: float, y: float):
         self.x = x
@@ -8,8 +8,8 @@ class Point:
 
 
 class Rect:
-    def __str__(self):
-        return f'Frame: {self.width}x{self.height} at ({self.origin.x}, {self.origin.y})'
+    # def __str__(self):
+    #     return f'Frame: {self.width}x{self.height} at ({self.origin.x}, {self.origin.y})'
 
     def __init__(self, width: int, height: int, origin: Point):
         self.origin = origin
@@ -18,7 +18,6 @@ class Rect:
 
 
 class Color:
-
     def __str__(self):
         hex_digits = ('{:02X}' * 3).format(self.r, self.g, self.b)
         return f'\'#{hex_digits.lower()}\''
